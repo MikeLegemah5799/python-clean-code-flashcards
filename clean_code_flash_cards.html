@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clean &amp; Maintainable Code — Python 3 Flash Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f0e7; --paper-2:#efe9dc;
+    --ink:#161514; --rule:#111;
+    --teal:#1f97ae; --teal-soft:#5bc0d0;
+    --coral:#e0514c; --muted:#726c60; --line:#d8d0be;
+    --code-bg:#191f26; --code-fg:#e7e3d8;
+    --code-com:#8aa889; --code-str:#e2b871; --code-kw:#5cc4da; --code-fn:#f0938c; --code-num:#c69cf0;
+    --disp:"Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);background-image:linear-gradient(var(--line) 1px, transparent 1px);background-size:100% 34px;color:var(--ink);font-family:var(--mono);min-height:100vh;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:840px;margin:0 auto;padding:26px 18px 60px;}
+
+  .kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(27px,6.2vw,46px);line-height:.98;letter-spacing:-.01em;margin:4px 0 8px;}
+  .sub{font-size:13px;color:var(--muted);line-height:1.55;max-width:66ch;}
+  .rule{height:6px;background:var(--rule);border-radius:2px;margin:12px 0 14px;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:11.5px;color:var(--muted);margin:0 0 16px;align-items:center;}
+  .legend b{color:var(--ink);}
+  .dot{display:inline-flex;align-items:center;gap:6px;}
+  .pip{width:11px;height:11px;border-radius:50%;display:inline-block;border:2px solid;}
+  .pip.core{background:var(--coral);border-color:var(--coral);}
+  .pip.common{background:transparent;border-color:var(--teal);}
+  .pip.sit{background:transparent;border-color:var(--muted);}
+
+  .filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+  .chip{font-size:11.5px;font-weight:600;letter-spacing:.02em;padding:6px 11px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:20px;cursor:pointer;transition:.12s;}
+  .chip:hover{background:var(--paper-2);}
+  .chip.active{background:var(--ink);color:var(--paper);}
+
+  .stage{perspective:1600px;margin-bottom:16px;}
+  .card{position:relative;width:100%;min-height:490px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.7,.2,1);cursor:pointer;}
+  .card.flipped{transform:rotateY(180deg);}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fbf8f1;border:2.5px solid var(--ink);border-radius:14px;box-shadow:7px 8px 0 rgba(17,17,17,.9);padding:24px 24px 20px;display:flex;flex-direction:column;overflow:hidden;}
+  .toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--teal);}
+  .tier{font-family:var(--disp);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:20px;white-space:nowrap;}
+  .tier.core{background:var(--coral);color:#fff;}
+  .tier.common{background:transparent;color:var(--teal);border:1.5px solid var(--teal);}
+  .tier.sit{background:transparent;color:var(--muted);border:1.5px solid var(--muted);}
+
+  .front{align-items:stretch;text-align:center;}
+  .front .center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;}
+  .term{font-family:var(--disp);font-weight:700;letter-spacing:-.015em;line-height:1.04;font-size:clamp(24px,5.2vw,42px);}
+  .underbar{height:5px;width:min(360px,72%);background:var(--rule);border-radius:2px;margin:20px auto 0;}
+  .flip-hint{margin-top:16px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;}
+  .flip-hint b{color:var(--coral);font-weight:700;}
+  .arrow{color:var(--coral);font-family:var(--disp);font-weight:700;}
+
+  .back{transform:rotateY(180deg);}
+  .backscroll{overflow-y:auto;flex:1;display:flex;flex-direction:column;padding-right:3px;}
+  .backscroll::-webkit-scrollbar{width:7px;}
+  .backscroll::-webkit-scrollbar-thumb{background:#cfc7b4;border-radius:4px;}
+  .bterm{font-family:var(--disp);font-weight:700;font-size:clamp(18px,3.8vw,24px);margin:3px 0 8px;line-height:1.05;}
+  .thinrule{height:3px;background:var(--rule);border-radius:2px;margin:0 0 11px;}
+  .def{font-size:12.5px;line-height:1.5;color:#242019;margin:0 0 11px;}
+  .def strong{color:var(--teal);font-weight:700;}
+  .def code{background:var(--paper-2);border-radius:4px;padding:0 4px;font-size:11.5px;}
+  .def .li{display:block;padding-left:14px;position:relative;margin:3px 0;}
+  .def .li:before{content:"\203A";position:absolute;left:0;color:var(--coral);font-weight:700;}
+
+  .trigger{border-left:4px solid var(--coral);background:#fbeeec;border-radius:0 8px 8px 0;padding:9px 12px;margin:0 0 12px;}
+  .trigger .tlabel{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--coral);font-weight:700;display:block;margin-bottom:3px;}
+  .trigger .ttext{font-size:12px;line-height:1.45;color:#3a2320;}
+  .trigger .ttext code{background:#f3ddd9;border-radius:4px;padding:0 4px;}
+
+  pre{margin:0 0 12px;background:var(--code-bg);color:var(--code-fg);border-radius:9px;padding:12px 13px;font-family:var(--mono);font-size:11.5px;line-height:1.5;overflow-x:auto;white-space:pre;border:1px solid #2b333d;}
+  pre::-webkit-scrollbar{height:8px;}
+  pre::-webkit-scrollbar-thumb{background:#39424d;border-radius:4px;}
+  .c-com{color:var(--code-com);font-style:italic;}.c-str{color:var(--code-str);}.c-kw{color:var(--code-kw);}.c-fn{color:var(--code-fn);}.c-num{color:var(--code-num);}
+
+  .prob{margin:0 0 11px;}
+  .prob .plabel{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:5px;}
+  .pills{display:flex;flex-wrap:wrap;gap:6px;}
+  .pill{font-size:10.5px;font-weight:600;padding:4px 9px;border:1.5px solid var(--teal);color:var(--teal);border-radius:20px;background:#eef8fa;}
+
+  .cx{margin-top:auto;padding-top:10px;font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 16px;letter-spacing:.02em;border-top:1px dashed var(--line);}
+  .cx b{color:var(--ink);font-weight:700;}
+
+  .controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;}
+  .navbtn{font-family:var(--disp);font-weight:700;font-size:14px;padding:11px 16px;border:2.5px solid var(--ink);background:#fbf8f1;color:var(--ink);border-radius:11px;cursor:pointer;transition:.1s;box-shadow:3px 4px 0 rgba(17,17,17,.85);}
+  .navbtn:hover{transform:translate(-1px,-1px);box-shadow:4px 5px 0 rgba(17,17,17,.85);}
+  .navbtn:active{transform:translate(2px,3px);box-shadow:1px 1px 0 rgba(17,17,17,.85);}
+  .flipbtn{background:var(--coral);color:#fff;}
+  .counter{font-family:var(--disp);font-weight:700;font-size:15px;text-align:center;min-width:70px;}
+  .counter small{display:block;font-family:var(--mono);font-weight:500;font-size:9.5px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:2px;line-height:1.3;}
+  .util{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .util .navbtn{font-size:12px;padding:8px 13px;box-shadow:2px 3px 0 rgba(17,17,17,.85);}
+  .foot{margin-top:26px;font-size:11px;color:var(--muted);text-align:center;line-height:1.7;}
+  .kbd{font-family:var(--mono);border:1px solid var(--muted);border-radius:5px;padding:1px 6px;font-size:10.5px;}
+  @media (max-width:520px){.face{padding:18px 16px;}.navbtn{padding:10px 12px;}body{background-size:100% 30px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Python 3 · code review &amp; craft · well-organized, readable, extensible</div>
+    <h1>Clean &amp; Maintainable Code</h1>
+    <p class="sub">The everyday craft of code that stays easy to read and change. Each card leads with the <strong>smell to catch in review</strong>, then a before → after refactor in Python. Study 1→5; the Core cards are the habits worth automating.</p>
+    <div class="rule"></div>
+    <div class="legend">
+      <span class="dot"><span class="pip core"></span><b>Core</b> — build the habit</span>
+      <span class="dot"><span class="pip common"></span><b>Common</b> — know well</span>
+      <span class="dot"><span class="pip sit"></span><b>Situational</b> — recognize &amp; recall</span>
+    </div>
+  </header>
+
+  <div class="filters" id="filters"></div>
+
+  <div class="stage">
+    <div class="card" id="card" onclick="flip()">
+      <div class="face front">
+        <div class="toprow"><span class="eyebrow" id="f-track"></span><span class="tier" id="f-tier"></span></div>
+        <div class="center">
+          <div class="term" id="f-term"></div>
+          <div class="underbar"></div>
+          <div class="flip-hint"><span class="arrow">&#x21BB;</span> flip for the smell, the fix &amp; the takeaway</div>
+        </div>
+      </div>
+      <div class="face back">
+        <div class="backscroll">
+          <div class="toprow"><span class="eyebrow" id="b-track"></span><span class="tier" id="b-tier"></span></div>
+          <div class="bterm" id="b-term"></div>
+          <div class="thinrule"></div>
+          <div class="def" id="b-def"></div>
+          <div class="trigger"><span class="tlabel" id="b-tlabel"></span><span class="ttext" id="b-trigger"></span></div>
+          <pre id="b-code"></pre>
+          <div class="prob" id="b-prob-wrap"><div class="plabel" id="b-mapslabel"></div><div class="pills" id="b-prob"></div></div>
+          <div class="cx" id="b-cx"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="navbtn" onclick="prev(event)">&#x2039; Prev</button>
+    <div class="counter"><span id="pos">1</span> / <span id="total">1</span><small id="deckname">All</small></div>
+    <button class="navbtn" onclick="next(event)">Next &#x203A;</button>
+  </div>
+  <div class="util">
+    <button class="navbtn flipbtn" onclick="flip(event)">Flip &#x27F3;</button>
+    <button class="navbtn" onclick="shuffle(event)">Shuffle &#x2928;</button>
+    <button class="navbtn" onclick="coreOnly(event)">Core only &#x2605;</button>
+    <button class="navbtn" onclick="reset(event)">Reset &#x21BA;</button>
+  </div>
+
+  <p class="foot">
+    <span class="kbd">&#x2190;</span> / <span class="kbd">&#x2192;</span> navigate &nbsp;·&nbsp; <span class="kbd">Space</span> flip &nbsp;·&nbsp; <span class="kbd">S</span> shuffle &nbsp;·&nbsp; <span class="kbd">C</span> core-only<br>
+    25 cards &nbsp;·&nbsp; naming &nbsp;·&nbsp; functions &nbsp;·&nbsp; structure &nbsp;·&nbsp; robustness &nbsp;·&nbsp; extensibility
+  </p>
+</div>
+
+<script>
+const CARDS = [
+/* ===== 1 · NAMING & READABILITY ===== */
+{track:"1 · Naming & Readability",tier:"core",term:"Intention-Revealing Names",
+ def:"A name should say why the thing exists, what it holds, and how it\u2019s used \u2014 so code reads like prose and needs fewer comments.",
+ tlabel:"The smell",
+ trigger:"Single letters outside a tiny loop, <code>d</code>/<code>tmp</code>/<code>data</code>/<code>info</code>, cryptic abbreviations, or names that lie about their contents. If a variable needs a comment to explain it, the name is wrong.",
+ code:`# BEFORE
+d = {}
+for x in l:
+    if x[3] > 30: process(x)
+
+# AFTER
+inactive_users = {}
+for user in users:
+    if user.days_since_login > 30:
+        deactivate(user)`,
+ mapsLabel:"Supports",maps:["Self-documenting code","Fewer comments"],
+ cx:["a good name replaces a comment"]},
+
+{track:"1 · Naming & Readability",tier:"core",term:"Magic Numbers \u2192 Constants",
+ def:"Replace unexplained literals with named constants: the meaning becomes explicit and there\u2019s exactly one place to change the value.",
+ tlabel:"The smell",
+ trigger:"Bare numbers or strings in logic \u2014 <code>86400</code>, <code>0.07</code>, <code>\"admin\"</code>, <code>200</code>. The reader guesses the meaning, and every copy can drift out of sync.",
+ code:`# BEFORE
+if user.role == "admin" and age >= 18:
+    fee = total * 0.07
+
+# AFTER
+ADMIN = "admin"
+LEGAL_AGE = 18
+TAX_RATE = 0.07
+if user.role == ADMIN and age >= LEGAL_AGE:
+    fee = total * TAX_RATE`,
+ mapsLabel:"Related",maps:["DRY","Config over hardcoding"],
+ cx:["name the value, <b>centralize</b> the change"]},
+
+{track:"1 · Naming & Readability",tier:"core",term:"Type Hints",
+ def:"Annotate parameters and returns so the signature documents intent and a checker (mypy) catches mismatches before runtime.",
+ tlabel:"Reach for it when",
+ trigger:"A function whose argument and return types you can only learn by reading its body. Add hints to public functions and module boundaries first.",
+ code:`# BEFORE
+def parse(data): ...
+
+# AFTER
+def parse(raw: str) -> dict[str, int]:
+    ...
+# the signature is now the contract, and
+# mypy flags wrong callers before you ship`,
+ mapsLabel:"Supports",maps:["Readability","Testability"],
+ cx:["signatures as <b>living documentation</b>"]},
+
+{track:"1 · Naming & Readability",tier:"common",term:"Comments: Why, Not What",
+ def:"Good comments explain intent, tradeoffs, and non-obvious \u201cwhy.\u201d Comments that restate the code go stale and add noise. Docstrings carry the public contract.",
+ tlabel:"The smell",
+ trigger:"Comments narrating obvious code (<code>i += 1  # add one</code>), commented-out dead code, or a comment compensating for a bad name \u2014 rename instead.",
+ code:`# BAD: restates the code
+x = x + 1            # add one to x
+
+# GOOD: explains the why
+# Retry once: the upstream API drops the first
+# request after an idle socket (TICKET-482).
+result = call_with_retry(payload)
+
+def area(r: float) -> float:
+    """Area of a circle; r in metres."""  # contract`,
+ mapsLabel:"Related",maps:["Naming","Docstrings"],
+ cx:["code says <b>what</b>, comments say <b>why</b>"]},
+
+{track:"1 · Naming & Readability",tier:"common",term:"Pythonic Idioms",
+ def:"Idiomatic Python is shorter and clearer: comprehensions, unpacking, <code>enumerate</code>/<code>zip</code>, f-strings, context managers, truthiness.",
+ tlabel:"Reach for it when",
+ trigger:"C-style loops with manual index counters, <code>range(len(x))</code>, string building with <code>+</code>, or manually closing files.",
+ code:`# BEFORE
+result = []
+for i in range(len(names)):
+    result.append(names[i].upper())
+f = open("x"); data = f.read(); f.close()
+
+# AFTER
+result = [name.upper() for name in names]
+with open("x") as f:          # auto-closes
+    data = f.read()`,
+ mapsLabel:"Supports",maps:["Readability","Less code"],
+ cx:["idiomatic = shorter <b>and</b> clearer"]},
+
+{track:"1 · Naming & Readability",tier:"sit",term:"Let Tools Enforce Style",
+ def:"Don\u2019t argue formatting in review \u2014 delegate it to an auto-formatter and linter so humans spend attention on logic, not whitespace.",
+ tlabel:"Reach for it when",
+ trigger:"PR comments about spacing, import order, or line length; style drifting across a codebase over time.",
+ code:`# put these in CI / pre-commit, not review nits:
+#   black .        auto-format
+#   ruff check .   lint + import order
+#   mypy .         static type checks
+# style becomes automatic; reviews discuss logic`,
+ mapsLabel:"Related",maps:["PEP 8","CI / pre-commit"],
+ cx:["automate style, <b>review logic</b>"]},
+
+/* ===== 2 · FUNCTIONS & CONTROL FLOW ===== */
+{track:"2 · Functions & Control Flow",tier:"core",term:"Functions Do One Thing",
+ def:"A function should do one thing, at one level of abstraction. Small, single-purpose functions are easier to name, test, and reuse.",
+ tlabel:"The smell",
+ trigger:"Dozens of lines; \u201cparagraphs\u201d separated by blank lines each doing a sub-task; or a name that needs <em>and</em> in it (<code>validate_and_save</code>).",
+ code:`# BEFORE: one function, three jobs
+def handle(order):
+    if not order.items: raise ValueError
+    total = sum(i.price for i in order.items)
+    db.save(order, total)
+
+# AFTER: each job named, tiny, testable
+def validate(order): ...
+def compute_total(order): ...
+def persist(order, total): ...`,
+ mapsLabel:"Related",maps:["SRP","Testability"],
+ cx:["if the name needs <b>and</b>, split it"]},
+
+{track:"2 · Functions & Control Flow",tier:"core",term:"Guard Clauses & Early Return",
+ def:"Handle edge and error cases up front and return early, so the happy path stays flat and un-indented. Kills arrow-shaped nesting.",
+ tlabel:"The smell",
+ trigger:"Deeply nested <code>if/else</code> (the \u201cpyramid of doom\u201d), or the real work buried three indents deep.",
+ code:`# BEFORE: nested pyramid
+def pay(user, cart):
+    if user:
+        if user.active:
+            if cart:
+                return charge(user, cart)
+
+# AFTER: guards first, flat happy path
+def pay(user, cart):
+    if not user:        raise ValueError("no user")
+    if not user.active: raise ValueError("inactive")
+    if not cart:        return None
+    return charge(user, cart)`,
+ mapsLabel:"Related",maps:["Readability","Lower complexity"],
+ cx:["fail early, keep the <b>happy path flat</b>"]},
+
+{track:"2 · Functions & Control Flow",tier:"common",term:"Few Arguments / No Flags",
+ def:"Long parameter lists are hard to read and call correctly. A boolean flag usually means the function does two things \u2014 split it, or pass a small options object.",
+ tlabel:"The smell",
+ trigger:"Four+ positional args, or a call like <code>render(page, True, False, True)</code> where the booleans are unreadable at the call site.",
+ code:`# BEFORE
+def render(page, is_admin, show_ads, dark): ...
+render(p, True, False, True)      # what do these mean?
+
+# AFTER: split the flag; keyword-only for the rest
+def render_admin(page, *, dark=False): ...
+def render_public(page, *, dark=False): ...
+render_public(p, dark=True)       # self-explaining`,
+ mapsLabel:"Related",maps:["SRP","Group data with types"],
+ cx:["a boolean flag often hides <b>two functions</b>"]},
+
+{track:"2 · Functions & Control Flow",tier:"common",term:"One Level of Abstraction",
+ def:"Within a function, keep every statement at the same conceptual level. Don\u2019t mix high-level policy with low-level string or byte fiddling.",
+ tlabel:"The smell",
+ trigger:"A function that calls a few well-named helpers, then abruptly drops into a raw regex or manual formatting \u2014 it reads like it keeps zooming in and out.",
+ code:`# BEFORE: policy mixed with low-level detail
+def checkout(cart):
+    total = compute_total(cart)
+    msg = "$" + format(total / 100, ".2f")   # low-level
+    send(msg)
+
+# AFTER: same altitude throughout
+def checkout(cart):
+    total = compute_total(cart)
+    send(format_currency(total))`,
+ mapsLabel:"Related",maps:["Do One Thing","Readability"],
+ cx:["don\u2019t mix <b>altitudes</b> in one function"]},
+
+{track:"2 · Functions & Control Flow",tier:"sit",term:"Command\u2013Query Separation",
+ def:"A method should either <strong>do</strong> something (a command: changes state, returns nothing) or <strong>answer</strong> something (a query: returns a value, no side effects) \u2014 not both.",
+ tlabel:"The smell",
+ trigger:"A getter that mutates, or a function whose return value you rely on but that also secretly writes to a DB, cache, or log.",
+ code:`# BEFORE: a query with a hidden side effect
+def get_user(id):
+    u = db.fetch(id)
+    u.last_seen = now(); db.save(u)   # surprise!
+    return u
+
+# AFTER: separate the two
+def get_user(id): return db.fetch(id)        # query
+def touch(u): u.last_seen = now(); db.save(u) # command`,
+ mapsLabel:"Related",maps:["Pure functions","Predictability"],
+ cx:["ask <b>or</b> act \u2014 not both"]},
+
+/* ===== 3 · STRUCTURE & ORGANIZATION ===== */
+{track:"3 · Structure & Organization",tier:"core",term:"High Cohesion, Low Coupling",
+ def:"<strong>Cohesion</strong>: things that change together live together. <strong>Coupling</strong>: how much modules depend on each other\u2019s internals. Aim for high cohesion, low coupling.",
+ tlabel:"The smell",
+ trigger:"A <code>utils</code> grab-bag of unrelated functions (low cohesion), or one small change forcing edits across many files (high coupling / shotgun surgery).",
+ code:`# LOW cohesion: unrelated things dumped together
+# utils.py -> parse_date, send_email, hash_pw, resize
+
+# HIGH cohesion: grouped by responsibility
+# dates.py    -> date helpers
+# email.py    -> sending
+# security.py -> hashing
+# modules talk through small, stable interfaces`,
+ mapsLabel:"Related",maps:["SRP","Separation of concerns"],
+ cx:["change together \u2192 <b>live together</b>"]},
+
+{track:"3 · Structure & Organization",tier:"common",term:"Separation of Concerns",
+ def:"Keep distinct responsibilities in distinct layers: business logic separate from I/O, presentation, and persistence.",
+ tlabel:"The smell",
+ trigger:"SQL, HTML, and business rules interleaved in one function; or UI code that also validates and writes to the database.",
+ code:`# BEFORE: logic + persistence + presentation tangled
+def report():
+    rows = db.execute("SELECT ...")
+    return "<table>" + render(rows)   # all mixed
+
+# AFTER: layered, each swappable + testable
+def fetch_rows(): return repo.all()   # data
+def build_report(rows): ...           # logic
+def render_html(report): ...          # presentation`,
+ mapsLabel:"Related",maps:["SRP","Layered architecture"],
+ cx:["separate <b>logic</b>, <b>I/O</b>, <b>presentation</b>"]},
+
+{track:"3 · Structure & Organization",tier:"common",term:"Encapsulation",
+ def:"Hide internal state behind a small, intentional interface so callers can\u2019t depend on \u2014 or corrupt \u2014 implementation details. Expose behavior, not raw fields.",
+ tlabel:"The smell",
+ trigger:"Callers reaching in to mutate attributes directly and each enforcing the invariant themselves; a class that\u2019s all public mutable fields and no methods.",
+ code:`# BEFORE: every caller must enforce the rule
+acct.balance -= 50          # nothing prevents overdraft
+
+# AFTER: behavior guards the invariant
+class Account:
+    def __init__(self): self._balance = 0
+    def withdraw(self, amt):
+        if amt > self._balance:
+            raise ValueError("insufficient funds")
+        self._balance -= amt`,
+ mapsLabel:"Related",maps:["Law of Demeter","Invariants"],
+ cx:["expose <b>behavior</b>, hide <b>state</b>"]},
+
+{track:"3 · Structure & Organization",tier:"common",term:"Group Data with Types",
+ def:"Replace clusters of loose primitives with a small type (<code>dataclass</code>, <code>NamedTuple</code>, <code>Enum</code>). It names the concept, bundles validation, and prevents mismatched arguments.",
+ tlabel:"The smell",
+ trigger:"The same three or four primitives passed together everywhere (<code>lat, lng</code>), or string / int \u201ccodes\u201d that should be an <code>Enum</code>. Classic \u201cprimitive obsession.\u201d",
+ code:`# BEFORE: loose primitives, easy to swap by mistake
+def move(x1, y1, x2, y2): ...
+
+# AFTER: a named, validated type
+from dataclasses import dataclass
+@dataclass(frozen=True)
+class Point:
+    x: float
+    y: float
+def move(start: Point, end: Point): ...
+
+from enum import Enum
+class Status(Enum):
+    ACTIVE = "active"; BANNED = "banned"`,
+ mapsLabel:"Related",maps:["Type hints","Readability"],
+ cx:["give recurring data a <b>name and a type</b>"]},
+
+{track:"3 · Structure & Organization",tier:"common",term:"Remove Duplication (DRY)",
+ def:"Extract repeated logic into one well-named place, so a rule changes in exactly one spot. Duplication is where bugs hide when only some copies get fixed.",
+ tlabel:"The smell",
+ trigger:"Copy-pasted blocks with tiny tweaks, or the same calculation in several functions. Caveat: don\u2019t merge code that\u2019s alike by coincidence but evolves for different reasons.",
+ code:`# BEFORE: same discount rule in three places
+price_a = base_a - base_a * 0.1
+price_b = base_b - base_b * 0.1
+
+# AFTER: one source of truth
+def apply_discount(price, rate=0.10):
+    return price - price * rate`,
+ mapsLabel:"Refactors to",maps:["Extract Function","SRP"],
+ cx:["one rule \u2192 <b>one place</b>","avoid <b>coincidental</b> DRY"]},
+
+/* ===== 4 · ROBUSTNESS & PREDICTABILITY ===== */
+{track:"4 · Robustness & Predictability",tier:"core",term:"Fail Fast + Specific Exceptions",
+ def:"Validate inputs at the boundary and raise a <strong>specific, informative</strong> exception immediately. Don\u2019t swallow errors or let bad state travel deep before it explodes.",
+ tlabel:"The smell",
+ trigger:"A bare <code>except:</code> or <code>except Exception: pass</code>, returning <code>None</code>/<code>-1</code> to signal failure, or an error surfacing far from its cause.",
+ code:`# BEFORE: silent failure, vague signal
+def load(cfg):
+    try: return parse(cfg)
+    except: return None          # hides everything
+
+# AFTER: fail fast, be specific, keep the cause
+def load(cfg: str) -> Config:
+    if not cfg:
+        raise ValueError("config path is empty")
+    try:
+        return parse(cfg)
+    except JSONDecodeError as e:
+        raise ConfigError(f"invalid config: {e}") from e`,
+ mapsLabel:"Related",maps:["Guard clauses","Robustness"],
+ cx:["raise <b>early</b>, raise <b>specific</b>","never <b>except: pass</b>"]},
+
+{track:"4 · Robustness & Predictability",tier:"common",term:"EAFP over LBYL",
+ def:"Pythonic style prefers \u201cEasier to Ask Forgiveness than Permission\u201d \u2014 try the operation and handle the exception \u2014 over \u201cLook Before You Leap\u201d checks that race and clutter.",
+ tlabel:"Reach for it when",
+ trigger:"Stacks of pre-checks (<code>if key in d and d[key] and ...</code>) guarding an access, or a time-of-check/time-of-use race between the check and the use.",
+ code:`# LBYL: check then act (can race, verbose)
+if os.path.exists(path):
+    with open(path) as f: ...   # file may vanish between
+
+# EAFP: just try it
+try:
+    with open(path) as f: ...
+except FileNotFoundError:
+    handle_missing()`,
+ mapsLabel:"Related",maps:["Pythonic","Robustness"],
+ cx:["try first, handle the <b>specific</b> failure"]},
+
+{track:"4 · Robustness & Predictability",tier:"common",term:"Pure Functions",
+ def:"A pure function\u2019s output depends only on its inputs and it changes nothing external. Pure logic is trivially testable and reusable \u2014 push side effects (I/O, mutation) to the edges.",
+ tlabel:"Reach for it when",
+ trigger:"A function that mutates its arguments, reads or writes globals, or does I/O in the middle of a calculation \u2014 so its result depends on hidden state.",
+ code:`# BEFORE: mutates input, reads a global
+def add_tax(order):
+    order.total *= GLOBAL_RATE      # side effects
+
+# AFTER: pure core, effects at the edge
+def with_tax(total: float, rate: float) -> float:
+    return total * (1 + rate)       # same in -> same out`,
+ mapsLabel:"Serves",maps:["Testability","Command\u2013Query Separation"],
+ cx:["push I/O to the <b>edges</b>, keep logic pure"]},
+
+{track:"4 · Robustness & Predictability",tier:"common",term:"Mutable Default Arguments",
+ def:"Default argument values are evaluated <strong>once</strong>, at definition time. A mutable default (list / dict / set) is shared across every call \u2014 a notorious Python bug.",
+ tlabel:"The smell",
+ trigger:"<code>def f(items=[])</code> or <code>def f(cache={})</code>. The default quietly accumulates state between calls.",
+ code:`# BUG: the same list is reused on every call
+def add(item, bucket=[]):
+    bucket.append(item)
+    return bucket
+add(1); add(2)          # -> [1, 2]  (surprise!)
+
+# FIX: sentinel default, build inside
+def add(item, bucket=None):
+    if bucket is None:
+        bucket = []
+    bucket.append(item)
+    return bucket`,
+ mapsLabel:"Related",maps:["Predictability","Pure functions"],
+ cx:["default to <b>None</b>, build the mutable inside"]},
+
+/* ===== 5 · EXTENSIBILITY & CHANGE ===== */
+{track:"5 · Extensibility & Change",tier:"core",term:"Design for Testability",
+ def:"Testable code <em>is</em> maintainable code. Prefer small pure functions, inject dependencies, and split logic from I/O so units test in isolation without heavy mocking.",
+ tlabel:"Reach for it when",
+ trigger:"You can\u2019t test a function without a database, network, clock, or randomness. That coupling is a <strong>design</strong> smell, not a testing inconvenience.",
+ code:`# HARD to test: reaches for now() and the DB itself
+def is_expired(token):
+    return token.exp < datetime.now()
+
+# EASY: inject the dependency (time)
+def is_expired(token, now: datetime) -> bool:
+    return token.exp < now
+# tests pass a fixed 'now' -> no clock mocking`,
+ mapsLabel:"Leans on",maps:["Dependency Injection","Pure functions"],
+ cx:["hard to test \u2192 a <b>design</b> smell"]},
+
+{track:"5 · Extensibility & Change",tier:"common",term:"Config over Hardcoding",
+ def:"Keep values that vary by environment or over time (URLs, keys, limits, feature flags) out of the code and in config \u2014 so behavior changes without editing and redeploying code.",
+ tlabel:"The smell",
+ trigger:"Hardcoded URLs, credentials, timeouts, or thresholds buried in logic; changing behavior between dev and prod requires a code edit.",
+ code:`# BEFORE: environment baked into the code
+API = "https://prod.example.com"
+TIMEOUT = 30
+
+# AFTER: read from config / environment
+import os
+API = os.environ["API_URL"]
+TIMEOUT = int(os.getenv("TIMEOUT", "30"))
+# one codebase runs in dev, staging, prod`,
+ mapsLabel:"Serves",maps:["OCP","12-Factor App"],
+ cx:["change behavior <b>without</b> touching code"]},
+
+{track:"5 · Extensibility & Change",tier:"sit",term:"Avoid Premature Abstraction",
+ def:"Don\u2019t extract an abstraction until the pattern has actually repeated (the Rule of Three). Early abstractions guess wrong and become harder to change than the duplication they replaced.",
+ tlabel:"Reach for it when",
+ trigger:"A base class, generic, or mini-framework built for a single use case \u201cto be flexible.\u201d The wrong abstraction costs more than a little duplication.",
+ code:`# Rule of Three
+#   1st time -> just write it
+#   2nd time -> duplicate; note the similarity
+#   3rd time -> NOW extract the abstraction
+# You only understand the real variation after
+# seeing a few concrete cases.`,
+ mapsLabel:"Related",maps:["YAGNI","KISS"],
+ cx:["duplication beats the <b>wrong</b> abstraction"]},
+
+{track:"5 · Extensibility & Change",tier:"common",term:"Refactoring Smells",
+ def:"A quick catalog of structural warning signs to scan for in review. Each maps to a known refactoring \u2014 spot the smell, name the fix.",
+ tlabel:"Diagnose it when you see",
+ trigger:"Use this as a code-review checklist. Naming the smell out loud is what turns \u201cthis feels off\u201d into an actionable change.",
+ code:`# Long Function ........ -> extract functions
+# Large Class .......... -> extract class (SRP)
+# Long Parameter List .. -> group into an object
+# Duplicated Code ...... -> extract + reuse (DRY)
+# Primitive Obsession .. -> introduce a type / enum
+# Feature Envy ......... -> move method to the data
+# Shotgun Surgery ...... -> consolidate the change
+# Deep Nesting ......... -> guard clauses`,
+ mapsLabel:"Related",maps:["SRP","DRY","Extract Class"],
+ cx:["name the smell \u2192 apply the <b>refactoring</b>"]},
+
+{track:"5 · Extensibility & Change",tier:"sit",term:"Boy Scout Rule",
+ def:"Leave the code a little cleaner than you found it. Small continuous improvements \u2014 a better name, one extracted helper \u2014 prevent slow decay into unmaintainable rot.",
+ tlabel:"Apply it when",
+ trigger:"You\u2019re already editing a file and spot a confusing name or a duplicated block. Fix the small thing in passing \u2014 don\u2019t wait for a \u201crefactor sprint\u201d that never comes.",
+ code:`# You came to fix a bug and noticed 'd' should be
+# 'days_left', and a block was duplicated nearby.
+# Rename it. Extract it. Ship both with the fix.
+# Maintainability is the sum of small deposits.`,
+ mapsLabel:"Related",maps:["Continuous refactoring"],
+ cx:["clean up <b>as you go</b>, not \u2018later\u2019"]},
+];
+
+/* ---- syntax highlighter ---- */
+const KW = new Set(["def","class","return","if","elif","else","while","for","in","not","and","or","is","None","True","False","import","from","self","del","pass","break","continue","lambda","yield","with","as","try","except","finally","raise","global","nonlocal"]);
+const FN = new Set(["print","len","range","set","dict","list","tuple","sum","max","min","append","pop","popleft","add","discard","get","index","setdefault","deque","heapq","join","upper","lower","sorted","enumerate","zip","perf_counter","open","format","dataclass","Enum","getenv","environ","datetime","JSONDecodeError","ConfigError","ValueError","now"]);
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function highlight(code){
+  return code.replace(/(#.*)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|([A-Za-z_]\w*)|(\d+)|([\s\S])/g,
+    (m,com,str,word,num,other)=>{
+      if(com!==undefined)  return '<span class="c-com">'+esc(com)+'</span>';
+      if(str!==undefined)  return '<span class="c-str">'+esc(str)+'</span>';
+      if(word!==undefined){
+        if(KW.has(word)) return '<span class="c-kw">'+word+'</span>';
+        if(FN.has(word)) return '<span class="c-fn">'+word+'</span>';
+        return esc(word);
+      }
+      if(num!==undefined)  return '<span class="c-num">'+num+'</span>';
+      return esc(other);
+    });
+}
+
+/* ---- app ---- */
+const TRACKS = ["All", ...Array.from(new Set(CARDS.map(c=>c.track)))];
+let filter="All", deck=CARDS.slice(), idx=0;
+const $=id=>document.getElementById(id);
+const TIER_LABEL={core:"Core",common:"Common",sit:"Situational"};
+
+function buildFilters(){
+  const box=$("filters"); box.innerHTML="";
+  TRACKS.forEach(t=>{
+    const b=document.createElement("button");
+    b.className="chip"+(t===filter?" active":"");
+    b.textContent=t;
+    b.onclick=()=>{filter=t;applyFilter();};
+    box.appendChild(b);
+  });
+}
+function applyFilter(){
+  deck = filter==="All" ? CARDS.slice() : CARDS.filter(c=>c.track===filter);
+  idx=0; buildFilters(); render();
+}
+function render(){
+  const c=deck[idx];
+  $("card").classList.remove("flipped");
+  $("f-track").textContent=c.track;
+  $("b-track").textContent=c.track;
+  ["f","b"].forEach(p=>{
+    const el=$(p+"-tier");
+    el.textContent=TIER_LABEL[c.tier];
+    el.className="tier "+c.tier;
+  });
+  $("f-term").textContent=c.term;
+  $("b-term").textContent=c.term;
+  $("b-def").innerHTML=c.def;
+  $("b-tlabel").textContent="\u25B8 "+c.tlabel;
+  $("b-trigger").innerHTML=c.trigger;
+  $("b-code").innerHTML=highlight(c.code);
+  const pw=$("b-prob-wrap");
+  if(c.maps && c.maps.length){
+    pw.style.display="";
+    $("b-mapslabel").textContent=c.mapsLabel||"Related";
+    $("b-prob").innerHTML=c.maps.map(p=>'<span class="pill">'+p+'</span>').join("");
+  } else { pw.style.display="none"; }
+  $("b-cx").innerHTML=c.cx.map(x=>"<span>"+x+"</span>").join("");
+  $("pos").textContent=idx+1;
+  $("total").textContent=deck.length;
+  $("deckname").textContent=filter;
+  const bs=document.querySelector(".backscroll"); if(bs) bs.scrollTop=0;
+}
+function flip(e){if(e)e.stopPropagation();$("card").classList.toggle("flipped");}
+function next(e){if(e)e.stopPropagation();idx=(idx+1)%deck.length;render();}
+function prev(e){if(e)e.stopPropagation();idx=(idx-1+deck.length)%deck.length;render();}
+function shuffle(e){if(e)e.stopPropagation();for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}idx=0;render();}
+function coreOnly(e){if(e)e.stopPropagation();filter="All";deck=CARDS.filter(c=>c.tier==="core");idx=0;buildFilters();$("deckname").textContent="Core";render();}
+function reset(e){if(e)e.stopPropagation();filter="All";applyFilter();}
+document.addEventListener("keydown",ev=>{
+  if(ev.key==="ArrowRight")next();
+  else if(ev.key==="ArrowLeft")prev();
+  else if(ev.key===" "){ev.preventDefault();flip();}
+  else if(ev.key.toLowerCase()==="s")shuffle();
+  else if(ev.key.toLowerCase()==="c")coreOnly();
+});
+buildFilters();render();
+</script>
+</body>
+</html>
